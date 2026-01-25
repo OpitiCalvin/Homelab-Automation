@@ -23,6 +23,6 @@
 
     - name: Reboot if required
       ansible.builtin.reboot:
-        msg: "Reboot initiated by Ansible after  package upgrade
+        msg: "Reboot initiated by Ansible after  package upgrade"
         reboot_timeout: 600
       when: reboot_required.stat.exists
