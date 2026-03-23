@@ -1,6 +1,17 @@
----
-- name: Update and upgrade Ubuntu servers
+- name: Check host reachability
   hosts: ubuntu_servers
+  gather_facts: false
+  tasks:
+    - name: ping host
+      ansible.builtin.ping:
+      register: ping_result
+      ignore_unreachable: true
+    - name: Group by status
+      ansible.builtin.group_by:
+        key: "{{ (ping_result is unreachable) | ternary('down','up') }}"
+
+- name: Update and upgrade Ubuntu servers
+  hosts: up
   become: true
   gather_facts: true
 
