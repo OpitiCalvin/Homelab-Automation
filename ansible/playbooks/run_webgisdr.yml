@@ -21,7 +21,7 @@
         cmd: "./webgisdr.sh --export --file {{ properties_file }} --output {{ output_file }}"
         chdir: "{{ webgisdr_path }}"
       register: backup_result
-      failed_when: "'The export of the Web GIS is complete' not in backup_result.stdout"
+      failed_when: "'The WebGIS DR utility completed successfully.' not in backup_result.stdout"
       changed_when: true
 
     - name: Log backup output to file
