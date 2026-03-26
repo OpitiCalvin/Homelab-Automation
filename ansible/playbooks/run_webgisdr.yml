@@ -6,8 +6,8 @@
   vars:
     webgisdr_path: "/opt/esrigis/arcgis/portal/tools/webgisdr"
     properties_file: "/mnt/gis_backups/config/webgisdr.properties"
-    output_file: "/mnt/gis_backups/final/platform_backup_{{ ansible_date_time.iso8601 }}.json"
-    log_file: "/mnt/gis_backups/logs/backup_{{ ansible_date_time.iso8601 }}.log"
+    output_file: "/mnt/gis_backups/final/portal/backup_report_{{ ansible_date_time.iso8601 }}.json"
+    log_file: "/mnt/gis_backups/logs/backup_log{{ ansible_date_time.iso8601 }}.log"
 
   tasks:
     - name: Ensure backup log directory exists
@@ -31,7 +31,7 @@
 
     - name: Cleanup old backups (Keep last 7 days)
       ansible.builtin.find:
-        paths: "/mnt/gis_backups/final"
+        paths: "/mnt/gis_backups/final/portal"
         age: 7d
         recurse: yes
       register: old_backups
