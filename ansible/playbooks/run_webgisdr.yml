@@ -1,0 +1,43 @@
+- name: Execute ArcGIS Enterprise Backup via webgisdr
+  hosts: ubuntu_arcgis_svrs
+  become: yes
+  become_user: arcgis  # Ensure the arcgis service account runs the tool
+  
+  vars:
+    webgisdr_path: "/opt/esrigis/arcgis/portal/tools/webgisdr"
+    properties_file: "/mnt/gis_backups/config/webgisdr.properties"
+    output_file: "/mnt/gis_backups/final/platform_backup_{{ ansible_date_time.iso8601 }}.json"
+    log_file: "/mnt/gis_backups/logs/backup_{{ ansible_date_time.iso8601 }}.log"
+
+  tasks:
+    - name: Ensure backup log directory exists
+      ansible.builtin.file:
+        path: "{{ log_file | dirname }}"
+        state: directory
+        mode: '0755'
+ 
+    - name: Run webgisdr export utility
+      ansible.builtin.shell:
+        cmd: "./webgisdr.sh --export --file {{ properties_file }} --output {{ output_file }}"
+        chdir: "{{ webgisdr_path }}"
+      register: backup_result
+      failed_when: "'The export of the Web GIS is complete' not in backup_result.stdout"
+      changed_when: true
+
+    - name: Log backup output to file
+      ansible.builtin.copy:
+        content: "{{ backup_result.stdout }}"
+        dest: "{{ log_file }}"
+
+    - name: Cleanup old backups (Keep last 7 days)
+      ansible.builtin.find:
+        paths: "/mnt/esrigis_backups/final"
+        age: 7d
+        recurse: yes
+      register: old_backups
+
+    - name: Remove expired backup files
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ old_backups.files }}"
