@@ -31,7 +31,7 @@
 
     - name: Cleanup old backups (Keep last 7 days)
       ansible.builtin.find:
-        paths: "/mnt/esrigis_backups/final"
+        paths: "/mnt/gis_backups/final"
         age: 7d
         recurse: yes
       register: old_backups
