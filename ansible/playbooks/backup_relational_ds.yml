@@ -1,0 +1,31 @@
+- name: Manual Relational Data Store Backup
+  hosts: ubuntu_arcgis_svrs
+  become: yes
+  become_user: arcgis
+  
+  vars:
+    # Path to the Data Store tools on Ubuntu
+    ds_tools_path: "/opt/esrigis/arcgis/datastore/tools"
+    # The SMB mount point we set up earlier
+    backup_dir: "/mnt/gis_backups/final/relds"
+    # Dynamic filename using a timestamp
+    backup_name: "manual_relds_bk_{{ ansible_date_time.iso8601_basic_short }}"
+
+  tasks:
+    - name: Ensure manual backup directory exists
+      ansible.builtin.file:
+        path: "{{ backup_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Execute backupdatastore utility
+      ansible.builtin.shell:
+        cmd: "./backupdatastore {{ backup_name }} --store relational --prompt no"
+        chdir: "{{ ds_tools_path }}"
+      register: ds_backup_result
+      changed_when: true
+
+    - name: Verify backup completion
+      ansible.builtin.debug:
+        msg: "Data Store backup created: {{ backup_name }} at {{ backup_dir }}"
+      when: "'Backup backupdatastore completed successfully' in ds_backup_result.stdout"
