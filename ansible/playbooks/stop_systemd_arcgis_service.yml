@@ -1,0 +1,28 @@
+- name: Prepare Ubuntu for OS Upgrade - Stop ArcGIS Services
+  hosts: ubuntu_arcgis_svrs
+  become: yes
+  
+  tasks:
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+
+    - name: Identify and stop ArcGIS-related services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: stopped
+      loop: "{{ ansible_facts.services.keys() | select('search', 'arcgis') | list }}"
+      when: 
+        - "item in ansible_facts.services"
+        - "ansible_facts.services[item].state == 'running'"
+      register: stopped_services
+
+    - name: Show which services were stopped
+      ansible.builtin.debug:
+        msg: "Successfully stopped: {{ item.item }}"
+      loop: "{{ stopped_services.results }}"
+      when: item.changed
+
+    - name: Wait for processes to clear (optional)
+      ansible.builtin.pause:
+        seconds: 10
+      description: "Giving Java processes time to gracefully exit..."
