@@ -29,3 +29,25 @@
       ansible.builtin.debug:
         msg: "Data Store backup created: {{ backup_name }} at {{ backup_dir }}"
       when: "'Operation completed successfully' in ds_backup_result.stdout"
+
+    - name: Find manual backups older than 28 days
+      ansible.builtin.find:
+        paths: 
+          - "{{ backup_dir }}_dbbackup"
+        age: 28d
+        recurse: no # We only want to find the top-level backup folders
+        file_type: any 
+        patterns: "manual_relds_*"
+      register: old_backups
+
+    - name: Delete expired manual backup files
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ old_backups.files }}"
+      when: old_backups.matched > 0
+
+    - name: Summary of cleanup
+      ansible.builtin.debug:
+        msg: "Cleaned up {{ old_backups.matched }} old backup files."
+      when: old_backups.matched > 0
