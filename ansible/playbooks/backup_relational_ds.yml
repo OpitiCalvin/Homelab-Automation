@@ -28,4 +28,4 @@
     - name: Verify backup completion
       ansible.builtin.debug:
         msg: "Data Store backup created: {{ backup_name }} at {{ backup_dir }}"
-      when: "'Backup backupdatastore completed successfully' in ds_backup_result.stdout"
+      when: "'Operation completed successfully' in ds_backup_result.stdout"
