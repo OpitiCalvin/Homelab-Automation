@@ -20,7 +20,7 @@
 
     - name: Execute backupdatastore utility
       ansible.builtin.shell:
-        cmd: "./backupdatastore {{ backup_name }} --store relational --prompt no"
+        cmd: "./backupdatastore.sh {{ backup_name }} --store relational --prompt no"
         chdir: "{{ ds_tools_path }}"
       register: ds_backup_result
       changed_when: true
