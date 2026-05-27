@@ -42,10 +42,10 @@
         state: absent
       with_items: "{{ old_backups.files }}"
 
-    - name: Cleanup old reports (Keep last 7 days)
+    - name: Cleanup old reports (Keep last 30 days)
       ansible.builtin.find:
         paths: "/mnt/gis_backups/webgisdr_reports"
-        age: 7d
+        age: 30d
         recurse: no
       register: old_reports
 
@@ -55,10 +55,10 @@
         state: absent
       with_items: "{{ old_reports.files }}"
 
-    - name: Cleanup old log files (Keep last 90 days)
+    - name: Cleanup old log files (Keep last 30 days)
       ansible.builtin.find:
         paths: "/mnt/gis_backups/logs"
-        age: 90d
+        age: 30d
         recurse: no
       register: old_logs
 
