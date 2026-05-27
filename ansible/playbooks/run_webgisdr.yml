@@ -6,8 +6,8 @@
   vars:
     webgisdr_path: "/opt/esrigis/arcgis/portal/tools/webgisdr"
     properties_file: "/mnt/gis_backups/config/webgisdr.properties"
-    output_file: "/mnt/gis_backups/final/portal/backup_report_{{ ansible_date_time.iso8601 }}.json"
-    log_file: "/mnt/gis_backups/logs/backup_log{{ ansible_date_time.iso8601 }}.log"
+    output_file: "/mnt/gis_backups/webgisdr_reports/backup_report_{{ ansible_date_time.iso8601 }}.json"
+    log_file: "/mnt/gis_backups/logs/backup_log_{{ ansible_date_time.iso8601 }}.log"
 
   tasks:
     - name: Ensure backup log directory exists
@@ -31,9 +31,9 @@
 
     - name: Cleanup old backups (Keep last 7 days)
       ansible.builtin.find:
-        paths: "/mnt/gis_backups/final/portal"
+        paths: "/mnt/gis_backups/final"
         age: 7d
-        recurse: yes
+        recurse: no
       register: old_backups
 
     - name: Remove expired backup files
@@ -41,3 +41,29 @@
         path: "{{ item.path }}"
         state: absent
       with_items: "{{ old_backups.files }}"
+
+    - name: Cleanup old reports (Keep last 7 days)
+      ansible.builtin.find:
+        paths: "/mnt/gis_backups/webgisdr_reports"
+        age: 7d
+        recurse: no
+      register: old_reports
+
+    - name: Remove expired backup report files
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ old_reports.files }}"
+
+    - name: Cleanup old log files (Keep last 90 days)
+      ansible.builtin.find:
+        paths: "/mnt/gis_backups/logs"
+        age: 90d
+        recurse: no
+      register: old_logs
+
+    - name: Remove expired log files
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ old_logs.files }}"
